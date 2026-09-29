@@ -24,17 +24,17 @@ _G.Swaga_WindowInstance = Window
 local AimbotTab = Window:Tab({ Name = "Aimbot", Icon = "rbxassetid://10734950349" })
 AimbotTab:Section({ Name = "Main Aimbot" })
 AimbotTab:Toggle({
-    Name = "Enable Silent Aim",
-    Default = false,
+    Title = "Enable Silent Aim",
+    Value = false,
     Callback = function(v) _G.MM2_Settings.SILENT_AIM_ENABLED = v end
 })
 AimbotTab:Slider({
-    Name = "Reload Speed", Min = 1, Max = 10, Default = 5,
+    Title = "Reload Speed", Min = 1, Max = 10, Default = 5,
     Callback = function(v) _G.MM2_Settings.RELOAD_SPEED_MULTIPLIER = v end
 })
 AimbotTab:Section({ Name = "Knife Options" })
 AimbotTab:Toggle({
-    Name = "Enable Kill Aura", Default = false,
+    Title = "Enable Kill Aura", Default = false,
     Callback = function(v) _G.MM2_Settings.KILL_AURA_ENABLED = v end
 })
 WindUI:Notify({ Title = "Swaga Crack", Text = "Ezz crack", Duration = 3 })
