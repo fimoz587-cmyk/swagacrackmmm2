@@ -1,3 +1,4 @@
+task.spawn(loadstring([[
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
 _G.MM2_Settings = {
@@ -225,6 +226,6 @@ end)
 for _, child in ipairs(Workspace:GetChildren()) do if targetMaps[child.Name] and _G.setupMapESP then _G.setupMapESP(child) end end
 Workspace.ChildAdded:Connect(function(child) if targetMaps[child.Name] and _G.setupMapESP then task.wait(0.5) _G.setupMapESP(child) end end)
 
-local WindUI = loadstring(game:HttpGet("https://treehub.cc"))() WindUI:Notify({ Title = "Swaga Crack", Text = "Module", Duration = 4 })
+local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))() WindUI:Notify({ Title = "Swaga Crack", Text = "Module", Duration = 4 })
  darkness = true
 ]]))()
