@@ -22,18 +22,18 @@ local Window = WindUI:CreateWindow({
 _G.Swaga_WindowInstance = Window
 
 local AimbotTab = Window:Tab({ Name = "Aimbot", Icon = "rbxassetid://10734950349" })
-AimbotTab:CreateSection({ Name = "Main Aimbot" })
-AimbotTab:CreateToggle({
+AimbotTab:Section({ Name = "Main Aimbot" })
+AimbotTab:Toggle({
     Name = "Enable Silent Aim",
     Default = false,
     Callback = function(v) _G.MM2_Settings.SILENT_AIM_ENABLED = v end
 })
-AimbotTab:CreateSlider({
+AimbotTab:Slider({
     Name = "Reload Speed", Min = 1, Max = 10, Default = 5,
     Callback = function(v) _G.MM2_Settings.RELOAD_SPEED_MULTIPLIER = v end
 })
-AimbotTab:CreateSection({ Name = "Knife Options" })
-AimbotTab:CreateToggle({
+AimbotTab:Section({ Name = "Knife Options" })
+AimbotTab:Toggle({
     Name = "Enable Kill Aura", Default = false,
     Callback = function(v) _G.MM2_Settings.KILL_AURA_ENABLED = v end
 })
