@@ -21,7 +21,7 @@ local Window = WindUI:CreateWindow({
 })
 _G.Swaga_WindowInstance = Window
 
-local AimbotTab = Window:CreateTab({ Name = "Aimbot", Icon = "rbxassetid://10734950349" })
+local AimbotTab = Window:Tab({ Name = "Aimbot", Icon = "rbxassetid://10734950349" })
 AimbotTab:CreateSection({ Name = "Main Aimbot" })
 AimbotTab:CreateToggle({
     Name = "Enable Silent Aim",
@@ -44,7 +44,7 @@ local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footag
 local Window = _G.Swaga_WindowInstance
 if not Window then return end
 
-local VisualsTab = Window:CreateTab({ Name = "Visuals", Icon = "rbxassetid://10723346939" })
+local VisualsTab = Window:Tab({ Name = "Visuals", Icon = "rbxassetid://10723346939" })
 VisualsTab:CreateSection({ Name = "Item Highlights" })
 VisualsTab:CreateToggle({
     Name = "Coins Highlights", Default = false,
