@@ -40,7 +40,7 @@ AimbotTab:CreateToggle({
 WindUI:Notify({ Title = "Swaga Crack", Text = "Ezz crack", Duration = 3 })
 ]]))()
 task.spawn(loadstring([[
-local WindUI = loadstring(game:HttpGet("https://treehub.cc"))()
+local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
 local Window = _G.Swaga_WindowInstance
 if not Window then return end
 
