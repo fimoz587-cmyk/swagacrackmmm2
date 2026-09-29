@@ -13,7 +13,7 @@ _G.MM2_Settings = {
     ShowOnlyImportantRoles = false
 }
 
-local Window = WindUI:Window({
+local Window = WindUI:CreateWindow({
     Title = "Swaga Crack MM2",
     Icon = "rbxassetid://1298301",
     Author = "Cracked by @AnalogyScript",
