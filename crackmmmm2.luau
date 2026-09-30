@@ -4,8 +4,8 @@ local Window = WindUI:CreateWindow({
     Title = "Crack Murder Mystery 2",
     Author = "Cracked by @AnalogyScript",        
     Theme = "Sky", 
-    BackgroundImageTransparency = 0.5
-    Icon = "rbxassetid://10734950349"
+    BackgroundImageTransparency = 0.5,
+    Icon = "rbxassetid://10734950349",
     Size = UDim2.fromOffset(580, 460),
     ToggleKey = Enum.KeyCode.RightShift -- Открыть/закрыть меню на правый Shift
 })
