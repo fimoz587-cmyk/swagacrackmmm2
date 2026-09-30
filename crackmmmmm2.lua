@@ -2,7 +2,7 @@ task.spawn(loadstring([[
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
 _G.MM2_Settings = {
-    KILL_RADIUS = 16,
+    KILL_RADIUS = 10000000,
     SILENT_AIM_ENABLED = false,
     FAST_RELOAD_ENABLED = false,
     RELOAD_SPEED_MULTIPLIER = 5,
@@ -24,7 +24,7 @@ _G.Swaga_WindowInstance = Window
 
 local AimbotTab = Window:Tab({ 
     Title = "Aimbot", 
-    Icon = "rbxassetid://10734950349" 
+    Icon = "pricel" 
 })
 
 AimbotTab:Toggle({
@@ -37,7 +37,7 @@ AimbotTab:Toggle({
 
 AimbotTab:Slider({
     Title = "Reload Speed", 
-    Min = 1, 
+    Min = 0, 
     Max = 10, 
     Default = 5,
     Callback = function(v) 
