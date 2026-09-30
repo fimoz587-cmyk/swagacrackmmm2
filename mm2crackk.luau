@@ -7,7 +7,6 @@ if not _G.MM2_Settings then
     }
 end
 
-task.spawn(loadstring([[
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 local Window = WindUI:CreateWindow({
     Title = "MM2 Swaga Hub",
@@ -73,8 +72,6 @@ SheriffSection:Slider({
     Value = { Min = 1, Max = 10, Default = 1 }, Step = 0.5,
     Callback = function(v) _G.MM2_Settings.RELOAD_SPEED_MULTIPLIER = v end
 })
-]]))()
-task.spawn(loadstring([[
 local Players = game:GetService("Players") 
 local Workspace = game:GetService("Workspace") 
 local CoreGui = game:GetService("CoreGui")
@@ -174,8 +171,6 @@ task.spawn(function()
         for g in pairs(_G.AvailableGuns) do if not g or not g:IsDescendantOf(Workspace) then _G.AvailableGuns[g] = nil end end 
     end 
 end)
-]]))()
-task.spawn(loadstring([[
 local Players = game:GetService("Players") 
 local Workspace = game:GetService("Workspace") 
 local LocalPlayer = Players.LocalPlayer
@@ -266,8 +261,6 @@ task.spawn(function()
         end
     end
 end)
-]]))()
-task.spawn(loadstring([[
 local Players = game:GetService("Players") 
 local Workspace = game:GetService("Workspace") 
 local LocalPlayer = Players.LocalPlayer
@@ -333,4 +326,3 @@ end)
 
 for _, child in ipairs(Workspace:GetChildren()) do if targetMaps[child.Name] and _G.setupMapESP then _G.setupMapESP(child) end end
 Workspace.ChildAdded:Connect(function(child) if targetMaps[child.Name] and _G.setupMapESP then task.wait(0.5) _G.setupMapESP(child) end end)
-]]))()
