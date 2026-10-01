@@ -346,7 +346,6 @@ HighlightsTab:Toggle({
     Callback = function(state)
         if state then
 local Workspace = game:GetService("Workspace")
-
 local mapNames = {
     "Office3", "School", "Hospital3", "Mansion2", "House2", 
     "Hotel2", "MilBase", "Factory", "ResearchFactory", 
