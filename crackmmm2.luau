@@ -405,8 +405,10 @@ local Workspace = game:GetService("Workspace")
 for _, desc in ipairs(Workspace:GetDescendants()) do
     if desc.Name == "GunDropHighlight" then
         desc:Destroy()
+                end
+            end
+        end
     end
-end
 })
 
 -- 5. Вкладка ESP
