@@ -4,7 +4,7 @@ local Window = WindUI:CreateWindow({
     Title = "Crack Murder Mystery 2",
     Author = "Cracked by @AnalogyScript",        
     Theme = "Sky", 
-    BackgroundImageTransparency = 0.5,
+    Transparency = 0.5,
     Icon = "rbxassetid://10734950349",
     Size = UDim2.fromOffset(580, 460),
     ToggleKey = Enum.KeyCode.RightShift -- Открыть/закрыть меню на правый Shift
@@ -364,9 +364,107 @@ ESPTab:Toggle({
     Title = "Включить ESP (ВХ)",
     Callback = function(state)
         if state then
-            -- [ВСТАВЛЯЙ СВОЙ КОД СЮДА] (сработает при включении)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+local function getRole(player)
+    if not player or not player.Character then return "Innocent", Color3.fromRGB(0, 255, 100) end
+    
+    local char = player.Character
+    local backpack = player:FindFirstChild("Backpack")
+    
+    local hasKnife = char:FindFirstChild("Knife") or (backpack and backpack:FindFirstChild("Knife"))
+    local hasGun = char:FindFirstChild("Gun") or char:FindFirstChild("Revolver") or (backpack and (backpack:FindFirstChild("Gun") or backpack:FindFirstChild("Revolver")))
+    
+    if hasKnife then
+        return "Murderer", Color3.fromRGB(255, 50, 50)
+    elseif hasGun then
+        return "Sheriff", Color3.fromRGB(50, 150, 255)
+    else
+        return "Innocent", Color3.fromRGB(0, 255, 100)
+    end
+end
+
+local function createESP(player)
+    if player == LocalPlayer then return end
+
+    local function apply()
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart", 5)
+        local head = char:WaitForChild("Head", 5)
+        if not hrp or not head then return end
+
+        if char:FindFirstChild("RoleESP") then char.RoleESP:Destroy() end
+        if char:FindFirstChild("RoleHighlight") then char.RoleHighlight:Destroy() end
+
+        local bb = Instance.new("BillboardGui")
+        bb.Name = "RoleESP"
+        bb.Adornee = head
+        bb.Size = UDim2.new(0, 150, 0, 40)
+        bb.StudsOffset = Vector3.new(0, 2.5, 0)
+        bb.AlwaysOnTop = true
+
+        local txt = Instance.new("TextLabel")
+        txt.Parent = bb
+        txt.Size = UDim2.new(1, 0, 1, 0)
+        txt.BackgroundTransparency = 1
+        txt.TextColor3 = Color3.fromRGB(255, 255, 255)
+        txt.TextStrokeTransparency = 0
+        txt.TextSize = 14
+        txt.Font = Enum.Font.SourceSansBold
+
+        local hl = Instance.new("Highlight")
+        hl.Name = "RoleHighlight"
+        hl.Parent = char
+        hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        hl.FillTransparency = 0.5
+        hl.OutlineTransparency = 0
+
+        bb.Parent = char
+
+        local conn
+        conn = RunService.RenderStepped:Connect(function()
+            if not char or not char:IsDescendantOf(workspace) or not hrp or not head then
+                conn:Disconnect()
+                return
+            end
+            local roleName, color = getRole(player)
+            txt.Text = player.Name .. "\n[" .. roleName .. "]"
+            txt.TextColor3 = color
+            hl.FillColor = color
+            hl.OutlineColor = color
+        end)
+    end
+
+    if player.Character then
+        task.spawn(apply)
+    end
+    player.CharacterAdded:Connect(function()
+        task.wait(0.5)
+        apply()
+    end)
+end
+
+for _, p in ipairs(Players:GetPlayers()) do
+    createESP(p)
+end
+
+Players.PlayerAdded:Connect(createESP)
         else
-            -- [ВСТАВЛЯЙ СВОЙ КОД СЮДА] (сработает при выключении)
+local Players = game:GetService("Players")
+
+getgenv().RoleESPEnabled = false
+
+for _, player in ipairs(Players:GetPlayers()) do
+    if player.Character then
+        local char = player.Character
+        local esp = char:FindFirstChild("RoleESP")
+        local hl = char:FindFirstChild("RoleHighlight")
+        if esp then esp:Destroy() end
+        if hl then hl:Destroy() end
+    end
+end
         end
     end
 })
