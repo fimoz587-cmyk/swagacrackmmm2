@@ -402,7 +402,6 @@ Workspace.ChildAdded:Connect(function(child)
 end)
         else
 local Workspace = game:GetService("Workspace")
-
 for _, desc in ipairs(Workspace:GetDescendants()) do
     if desc.Name == "GunDropHighlight" then
         desc:Destroy()
