@@ -19,7 +19,7 @@ local CosmeticTab = Window:Tab({ Title = "Cosmetic", Icon = "sparkles" })
 local HighlightsTab = Window:Tab({ Title = "Highlights", Icon = "eye" })
 local MiscTab = Window:Tab({ Title = "Misc", Icon = "component" })
 local TrollTab = Window:Tab({ Title = "Troll", Icon = "laugh" })
-local ExploitsTab = Window:Tab({ Title = "Exploits", Icon = "zap" })
+local RageTab = Window:Tab({ Title = "Rage", Icon = "zap" })
 local SettingsTab = Window:Tab({ Title = "Settings", Icon = "settings" })
 
 -- ==========================================
@@ -738,7 +738,7 @@ MiscTab:Toggle({
 TrollTab:Button({
     Title = "Tung Tung Sahur Character",
     Desc = "Click and you'll turn into Tung Tung Tung Sahur."
-    Callback = function()
+    Callback = function(),
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
@@ -836,8 +836,8 @@ if player.Character then
 })
 
 -- 8. Вкладка Exploits
-ExploitsTab:Toggle({
-    Title = "Make the entire server lag (You’re using the cracked version, which has limited functionality. If you want access to more features, purchase Swaga Hub for Murder Mystery 2.)",
+RageTab:Toggle({
+    Title = "Anti Aim Spin",
     Desc = "makes the server lag",
     Callback = function(state)
         if state then
