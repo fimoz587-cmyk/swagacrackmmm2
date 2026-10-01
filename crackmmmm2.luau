@@ -410,7 +410,6 @@ for _, desc in ipairs(Workspace:GetDescendants()) do
     end
 end
     end
-end
         end
     end
 })
