@@ -4,7 +4,7 @@ local Window = WindUI:CreateWindow({
     Title = "Crack Murder Mystery 2",
     Author = "Cracked by @AnalogyScript",        
     Theme = "Sky", 
-    Icon = "rbxassetid://10734950349",
+    Icon = "rbxassetid://136657221209337",
     Size = UDim2.fromOffset(580, 460),
     ToggleKey = Enum.KeyCode.RightShift -- Открыть/закрыть меню на правый Shift
 })
@@ -39,14 +39,9 @@ SherifTab:Toggle({
 })
 
 -- 2. Вкладка Murder
-MurderTab:Toggle({
+MurderTab:Button({
     Title = "Auto-Kill (Only Murder)",
-    Callback = function(state)
-        if state then
-            -- [ВСТАВЛЯЙ СВОЙ КОД СЮДА] (сработает при включении)
-        else
-            -- [ВСТАВЛЯЙ СВОЙ КОД СЮДА] (сработает при выключении)
-        end
+    Callback = function()
     end
 })
 
