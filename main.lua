@@ -735,13 +735,101 @@ MiscTab:Toggle({
 })
 
 -- 7. Вкладка Troll
-TrollTab:Toggle({
-    Title = "Троллинг Игроков",
-    Callback = function(state)
-        if state then
-            -- [ВСТАВЛЯЙ СВОЙ КОД СЮДА] (сработает при включении)
-        else
-            -- [ВСТАВЛЯЙ СВОЙ КОД СЮДА] (сработает при выключении)
+TrollTab:Button({
+    Title = "Tung Tung Sahur Character",
+    Desc = "Click and you'll turn into Tung Tung Tung Sahur."
+    Callback = function()
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local ASSET_ID = 138151705692565
+local assetUrl = "rbxassetid://" .. ASSET_ID
+
+local SCALE_MULTIPLIER = 1
+local ROTATE_X = 0
+local ROTATE_Y = 0
+local ROTATE_Z = 0
+local HEIGHT_OFFSET = 0
+
+local renderConnection = nil
+
+local function applySkin(character)
+	if renderConnection then
+		renderConnection:Disconnect()
+		renderConnection = nil
+	end
+
+	local oldRoot = character:WaitForChild("HumanoidRootPart", 10)
+	if not oldRoot then return end
+
+	local success, result = pcall(function()
+		return game:GetObjects(assetUrl)
+	end)
+
+	if success and result then
+		local loadedObjects = type(result) == "table" and result or {result}
+		local adiMesh = nil
+
+		for _, obj in ipairs(loadedObjects) do
+			if obj:IsA("MeshPart") or obj:IsA("SpecialMesh") or obj:IsA("BasePart") then
+				adiMesh = obj
+				break
+			end
+		end
+
+		if not adiMesh then
+			for _, obj in ipairs(loadedObjects) do
+				adiMesh = obj:FindFirstChildWhichIsA("MeshPart") or obj:FindFirstChildWhichIsA("BasePart")
+				if adiMesh then break end
+			end
+		end
+
+		if adiMesh then
+			adiMesh.Name = "Adi_LocalMesh"
+			adiMesh.CanCollide = false
+			adiMesh.Anchored = true
+
+			if adiMesh:IsA("MeshPart") then
+				adiMesh.Size = adiMesh.Size * SCALE_MULTIPLIER
+			end
+
+			for _, part in ipairs(character:GetDescendants()) do
+				if part:IsA("BasePart") then
+					part.Transparency = 1
+				elseif part:IsA("Decal") then
+					part.Transparency = 1
+				end
+			end
+
+			adiMesh.Parent = Workspace
+			Workspace.CurrentCamera.CameraSubject = adiMesh
+
+			renderConnection = RunService.RenderStepped:Connect(function()
+				if character and oldRoot and adiMesh and adiMesh.Parent then
+					local targetCFrame = oldRoot.CFrame 
+						* CFrame.new(0, HEIGHT_OFFSET, 0) 
+						* CFrame.Angles(math.rad(ROTATE_X), math.rad(ROTATE_Y), math.rad(ROTATE_Z))
+					adiMesh.CFrame = targetCFrame
+				else
+					if adiMesh then adiMesh:Destroy() end
+					if renderConnection then
+						renderConnection:Disconnect()
+						renderConnection = nil
+					end
+				end
+			end)
+		end
+	end
+end
+
+player.CharacterAdded:Connect(applySkin)
+
+if player.Character then
+	task.spawn(applySkin, player.Character)
+              end
+           end
         end
     end
 })
