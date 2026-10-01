@@ -18,7 +18,6 @@ local SherifTab = Window:Tab({ Title = "Sherif", Icon = "shield" })
 local MurderTab = Window:Tab({ Title = "Murder", Icon = "skull" })
 local CosmeticTab = Window:Tab({ Title = "Cosmetic", Icon = "sparkles" })
 local HighlightsTab = Window:Tab({ Title = "Highlights", Icon = "eye" })
-local ESPTab = Window:Tab({ Title = "ESP", Icon = "scan" })
 local MiscTab = Window:Tab({ Title = "Misc", Icon = "component" })
 local TrollTab = Window:Tab({ Title = "Troll", Icon = "laugh" })
 local ExploitsTab = Window:Tab({ Title = "Exploits", Icon = "zap" })
@@ -42,7 +41,7 @@ SherifTab:Toggle({
 
 -- 2. Вкладка Murder
 MurderTab:Toggle({
-    Title = "Функция для Убийцы",
+    Title = "Auto-Kill (Only Murder)",
     Callback = function(state)
         if state then
             -- [ВСТАВЛЯЙ СВОЙ КОД СЮДА] (сработает при включении)
@@ -349,19 +348,82 @@ end
 
 -- 4. Вкладка Highlights
 HighlightsTab:Toggle({
-    Title = "Подсветка Объектов",
+    Title = "Highlights Gun Dropped",
     Callback = function(state)
         if state then
-            -- [ВСТАВЛЯЙ СВОЙ КОД СЮДА] (сработает при включении)
+local Workspace = game:GetService("Workspace")
+
+local mapNames = {
+    "Office3", "School", "Hospital3", "Mansion2", "House2", 
+    "Hotel2", "MilBase", "Factory", "ResearchFactory", 
+    "Office2", "Biolab", "Workplace", "PoliceStation", "Normal", "Map"
+}
+
+local function applyHighlight(target)
+    if not target or target:FindFirstChild("GunDropHighlight") then return end
+    local hl = Instance.new("Highlight")
+    hl.Name = "GunDropHighlight"
+    hl.FillColor = Color3.fromRGB(255, 140, 0)
+    hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+    hl.FillTransparency = 0.3
+    hl.OutlineTransparency = 0
+    hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    hl.Parent = target
+end
+
+local function scanObject(obj)
+    if not obj then return end
+    if obj.Name == "GunDrop" then
+        applyHighlight(obj)
+    elseif obj:FindFirstChild("GunDrop") then
+        applyHighlight(obj.GunDrop)
+    end
+end
+
+local function hookMap(map)
+    if not map then return end
+    for _, desc in ipairs(map:GetDescendants()) do
+        scanObject(desc)
+    end
+    map.DescendantAdded:Connect(scanObject)
+end
+
+for _, name in ipairs(mapNames) do
+    local map = Workspace:FindFirstChild(name)
+    if map then
+        hookMap(map)
+    end
+end
+
+for _, desc in ipairs(Workspace:GetDescendants()) do
+    scanObject(desc)
+end
+Workspace.DescendantAdded:Connect(scanObject)
+
+Workspace.ChildAdded:Connect(function(child)
+    if table.find(mapNames, child.Name) or child.Name == "Normal" or child.Name == "Map" then
+        hookMap(child)
+    else
+        scanObject(child)
+    end
+end)
         else
-            -- [ВСТАВЛЯЙ СВОЙ КОД СЮДА] (сработает при выключении)
+local Workspace = game:GetService("Workspace")
+
+for _, desc in ipairs(Workspace:GetDescendants()) do
+    if desc.Name == "GunDropHighlight" then
+        desc:Destroy()
+    end
+end
+    end
+end
         end
     end
 })
 
 -- 5. Вкладка ESP
-ESPTab:Toggle({
-    Title = "Включить ESP (ВХ)",
+HighlightsTab:Toggle({
+    Title = "Highlights Roles",
     Callback = function(state)
         if state then
 local Players = game:GetService("Players")
