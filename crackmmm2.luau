@@ -408,9 +408,6 @@ for _, desc in ipairs(Workspace:GetDescendants()) do
         desc:Destroy()
     end
 end
-    end
-        end
-    end
 })
 
 -- 5. Вкладка ESP
