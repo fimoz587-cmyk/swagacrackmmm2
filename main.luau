@@ -828,7 +828,8 @@ player.CharacterAdded:Connect(applySkin)
 
 if player.Character then
 	task.spawn(applySkin, player.Character)
-       end
+        end
+	  end
 })
 
 -- 8. Вкладка Exploits
