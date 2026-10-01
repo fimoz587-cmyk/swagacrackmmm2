@@ -38,66 +38,75 @@ SherifTab:Toggle({
     end
 })
 
--- Wind ui button
-Tab:Button({
-    Title = "Kill All",
+-- WindUI Button
+MurderTab:Button({
+    Title = "Knife Kill All",
     Callback = function()
-        getgenv().KnifeKillAll = not getgenv().KnifeKillAll
-        if not getgenv().KnifeKillAll then return end
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+        local char = LocalPlayer.Character
+        local backpack = LocalPlayer:FindFirstChild("Backpack")
+        
+        -- Ищем нож в руках или в рюкзаке
+        local knife = (char and char:FindFirstChild("Knife")) or (backpack and backpack:FindFirstChild("Knife"))
 
-        task.spawn(function()
-            local Players = game:GetService("Players")
-            local LocalPlayer = Players.LocalPlayer
+        if not knife then
+            WindUI:Notify({
+                Title = "Ошибка",
+                Content = "У вас нет ножа! Функция работает только за Убийцу.",
+                Duration = 3
+            })
+            return
+        end
 
-            while getgenv().KnifeKillAll do
-                task.wait(0.05)
-                local char = LocalPlayer.Character
-                local backpack = LocalPlayer:FindFirstChild("Backpack")
-                local knife = (char and char:FindFirstChild("Knife")) or (backpack and backpack:FindFirstChild("Knife"))
+        -- Если нож в рюкзаке, автоматически берем его в руки
+        if knife.Parent == backpack and char:FindFirstChildOfClass("Humanoid") then
+            char:FindFirstChildOfClass("Humanoid"):EquipTool(knife)
+            task.wait(0.05) -- Даем долю секунды на экипировку ножа
+        end
 
-                if knife then
-                    if knife.Parent == backpack and char:FindFirstChildOfClass("Humanoid") then
-                        char:FindFirstChildOfClass("Humanoid"):EquipTool(knife)
+        local events = knife:FindFirstChild("Events")
+        local stabRemote = events and events:FindFirstChild("KnifeStabbed")
+        local throwRemote = events and events:FindFirstChild("KnifeThrown")
+        local touchRemote = events and events:FindFirstChild("HandleTouched")
+
+        -- Один быстрый круг по всем игрокам (без бесконечного цикла while)
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character then
+                local targetChar = player.Character
+                local targetHum = targetChar:FindFirstChildOfClass("Humanoid")
+                local targetHRP = targetChar:FindFirstChild("HumanoidRootPart") or targetChar:FindFirstChild("Torso") or targetChar:FindFirstChild("UpperTorso")
+
+                if targetHum and targetHum.Health > 0 and targetHRP then
+                    if stabRemote then
+                        pcall(function()
+                            stabRemote:FireServer(targetHum)
+                            stabRemote:FireServer(targetHRP)
+                            stabRemote:FireServer(targetChar)
+                        end)
                     end
-
-                    local events = knife:FindFirstChild("Events")
-                    local stabRemote = events and events:FindFirstChild("KnifeStabbed")
-                    local throwRemote = events and events:FindFirstChild("KnifeThrown")
-                    local touchRemote = events and events:FindFirstChild("HandleTouched")
-
-                    for _, player in ipairs(Players:GetPlayers()) do
-                        if not getgenv().KnifeKillAll then break end
-                        if player ~= LocalPlayer and player.Character then
-                            local targetChar = player.Character
-                            local targetHum = targetChar:FindFirstChildOfClass("Humanoid")
-                            local targetHRP = targetChar:FindFirstChild("HumanoidRootPart") or targetChar:FindFirstChild("Torso") or targetChar:FindFirstChild("UpperTorso")
-
-                            if targetHum and targetHum.Health > 0 and targetHRP then
-                                if stabRemote then
-                                    pcall(function()
-                                        stabRemote:FireServer(targetHum)
-                                        stabRemote:FireServer(targetHRP)
-                                        stabRemote:FireServer(targetChar)
-                                    end)
-                                end
-                                if touchRemote then
-                                    pcall(function()
-                                        touchRemote:FireServer(targetHRP)
-                                    end)
-                                end
-                                if throwRemote then
-                                    pcall(function()
-                                        throwRemote:FireServer(targetHRP.CFrame, targetHRP.Position)
-                                    end)
-                                end
-                            end
-                        end
+                    if touchRemote then
+                        pcall(function()
+                            touchRemote:FireServer(targetHRP)
+                        end)
+                    end
+                    if throwRemote then
+                        pcall(function()
+                            throwRemote:FireServer(targetHRP.CFrame, targetHRP.Position)
+                        end)
                     end
                 end
             end
-        end)
+        end
+
+        WindUI:Notify({
+            Title = "&a✔️ Successful",
+            Content = "All Player Killed",
+            Duration = 3
+        })
     end
 })
+
 
 -- 3. Вкладка Cosmetic
 CosmeticTab:Toggle({
@@ -601,7 +610,8 @@ TrollTab:Toggle({
 
 -- 8. Вкладка Exploits
 ExploitsTab:Toggle({
-    Title = "Основные Читы (Exploits)",
+    Title = "Make the entire server lag (You’re using the cracked version, which has limited functionality. If you want access to more features, purchase Swaga Hub for Murder Mystery 2.)",
+    Desc = "makes the server lag",
     Callback = function(state)
         if state then
             -- [ВСТАВЛЯЙ СВОЙ КОД СЮДА] (сработает при включении)
@@ -612,19 +622,29 @@ ExploitsTab:Toggle({
 })
 
 -- 9. Вкладка Settings
-SettingsTab:Toggle({
-    Title = "Сохранение Настроек",
-    Callback = function(state)
-        if state then
-            -- [ВСТАВЛЯЙ СВОЙ КОД СЮДА] (сработает при включении)
-        else
-            -- [ВСТАВЛЯЙ СВОЙ КОД СЮДА] (сработает при выключении)
-        end
+SettingsTab:Dropdown({
+    Title = "Выбрать тему интерфейса",
+    Values = {
+        "Dark", "Light", "Sky", "Rose", "Plant", "Red", "Indigo", 
+        "Violet", "Amber", "Emerald", "Midnight", "Crimson", 
+        "MonokaiPro", "CottonCandy", "Mellowsi", "Rainbow"
+    },
+    Value = "Sky", -- Тема по умолчанию при запуске
+    Callback = function(selectedTheme)
+        -- Меняем тему всего GUI на выбранную из списка
+        WindUI:SetTheme(selectedTheme)
+        
+        -- Выводим красивое уведомление о смене стиля
+        WindUI:Notify({
+            Title = "Интерфейс",
+            Content = "Установлена тема: " .. selectedTheme,
+            Duration = 2
+        })
     end
 })
 
 WindUI:Notify({
-    Title = "Пожалуйста, не проигнорируйте это сообщение.",
-    Content = "Вы юзаете кряк версию! В этой версии урезан функционал, чтобы функционало было много купите свагу хаб!",
-    Time = 5
+    Title = "Please, don't ignore this message.",
+    Content = "You’re using the cracked version, which has limited functionality. If you want access to more features, purchase Swaga Hub for Murder Mystery 2.",
+    Time = 20
 })
