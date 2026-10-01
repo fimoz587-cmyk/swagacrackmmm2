@@ -872,7 +872,20 @@ if player.Character then
 	task.spawn(startSpin, player.Character)
 end
         else
-            -- [ВСТАВЛЯЙ СВОЙ КОД СЮДА] (сработает при выключении)
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+if player.Character then
+	local root = player.Character:FindFirstChild("HumanoidRootPart")
+	if root then
+		root.CFrame = CFrame.new(root.CFrame.Position)
+	end
+end
+
+for _, conn in ipairs(game:GetService("RunService").RenderStepped:GetConnections()) do
+	conn:Disconnect()
+                end
+            end
         end
     end
 })
