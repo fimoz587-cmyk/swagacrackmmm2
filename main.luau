@@ -403,6 +403,144 @@ end
     end
 })
 
+HighlightsTab:Toggle({
+    Title = "Highlights Coins",
+    Callback = function(state)
+        getgenv().AdvancedCoinESP = state
+
+        if state then
+            local Workspace = game:GetService("Workspace")
+            
+            getgenv().CoinHighlighted = {}
+            getgenv().CoinConnections = {}
+
+            local coinNames = {
+                MainCoin = true, Coin = true, CoinPart = true, 
+                CoinVisual = true, CoinMesh = true, DecalPart = true, ["2Part"] = true
+            }
+
+            local containerNames = {
+                Coin = true, Coins = true, CoinContainer = true, Coin_Container = true, 
+                CoinVisual = true, CoinPickup = true, CoinPickups = true, Collectible = true, Collectibles = true
+            }
+
+            local function isCoinName(name)
+                if coinNames[name] then return true end
+                local lower = string.lower(name)
+                return lower == "coin" or lower == "coins" or lower:find("coin") ~= nil
+            end
+
+            local function isCoinContainer(obj)
+                return containerNames[obj.Name] == true or string.lower(obj.Name):find("coin") ~= nil
+            end
+
+            local function addHighlight(obj)
+                if not getgenv().AdvancedCoinESP or not obj or getgenv().CoinHighlighted[obj] then return end
+                if not obj:IsA("BasePart") and not obj:IsA("Model") then return end
+
+                getgenv().CoinHighlighted[obj] = true
+                local old = obj:FindFirstChild("CoinHighlight")
+                if old then return end
+
+                local highlight = Instance.new("Highlight")
+                highlight.Name = "CoinHighlight"
+                highlight.FillColor = Color3.fromRGB(255, 215, 0)
+                highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                highlight.FillTransparency = 0.35
+                highlight.OutlineTransparency = 0
+                highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                highlight.Parent = obj
+            end
+
+            local function checkObject(obj)
+                if not getgenv().AdvancedCoinESP or not obj then return end
+
+                if isCoinName(obj.Name) then
+                    addHighlight(obj)
+                    return
+                end
+
+                local parent = obj.Parent
+                if parent and isCoinContainer(parent) then
+                    if obj:IsA("BasePart") or obj:IsA("Model") then
+                        addHighlight(obj)
+                    end
+                    return
+                end
+
+                if isCoinContainer(obj) then
+                    for _, child in ipairs(obj:GetChildren()) do
+                        if isCoinName(child.Name) then
+                            addHighlight(child)
+                        end
+                    end
+                end
+            end
+
+            local function scanContainer(container)
+                if not container then return end
+
+                for _, obj in ipairs(container:GetDescendants()) do
+                    checkObject(obj)
+                end
+
+                local connection = container.DescendantAdded:Connect(function(obj)
+                    if not getgenv().AdvancedCoinESP then return end
+                    checkObject(obj)
+
+                    task.defer(function()
+                        if obj and obj.Parent then
+                            checkObject(obj)
+                            for _, child in ipairs(obj:GetDescendants()) do
+                                checkObject(child)
+                            end
+                        end
+                    end)
+                end)
+
+                table.insert(getgenv().CoinConnections, connection)
+            end
+
+            scanContainer(Workspace)
+
+            local workspaceChildConn = Workspace.ChildAdded:Connect(function(child)
+                if not getgenv().AdvancedCoinESP then return end
+                checkObject(child)
+                task.defer(function()
+                    if child and child.Parent then
+                        scanContainer(child)
+                    end
+                end)
+            end)
+            table.insert(getgenv().CoinConnections, workspaceChildConn)
+
+            local workspaceRemovingConn = Workspace.DescendantRemoving:Connect(function(obj)
+                if getgenv().CoinHighlighted then
+                    getgenv().CoinHighlighted[obj] = nil
+                end
+            end)
+            table.insert(getgenv().CoinConnections, workspaceRemovingConn)
+        else
+            local Workspace = game:GetService("Workspace")
+            
+            if getgenv().CoinConnections then
+                for _, conn in ipairs(getgenv().CoinConnections) do
+                    if conn then conn:Disconnect() end
+                end
+                getgenv().CoinConnections = nil
+            end
+
+            getgenv().CoinHighlighted = nil
+
+            for _, desc in ipairs(Workspace:GetDescendants()) do
+                if desc.Name == "CoinHighlight" then
+                    desc:Destroy()
+                end
+            end
+        end
+    end
+})
+
 -- 4. Вкладка Highlights
 HighlightsTab:Toggle({
     Title = "Highlights Gun Dropped",
