@@ -38,10 +38,64 @@ SherifTab:Toggle({
     end
 })
 
--- 2. Вкладка Murder
-MurderTab:Button({
-    Title = "Auto-Kill (Only Murder)",
+-- Wind ui button
+Tab:Button({
+    Title = "Kill All",
     Callback = function()
+        getgenv().KnifeKillAll = not getgenv().KnifeKillAll
+        if not getgenv().KnifeKillAll then return end
+
+        task.spawn(function()
+            local Players = game:GetService("Players")
+            local LocalPlayer = Players.LocalPlayer
+
+            while getgenv().KnifeKillAll do
+                task.wait(0.05)
+                local char = LocalPlayer.Character
+                local backpack = LocalPlayer:FindFirstChild("Backpack")
+                local knife = (char and char:FindFirstChild("Knife")) or (backpack and backpack:FindFirstChild("Knife"))
+
+                if knife then
+                    if knife.Parent == backpack and char:FindFirstChildOfClass("Humanoid") then
+                        char:FindFirstChildOfClass("Humanoid"):EquipTool(knife)
+                    end
+
+                    local events = knife:FindFirstChild("Events")
+                    local stabRemote = events and events:FindFirstChild("KnifeStabbed")
+                    local throwRemote = events and events:FindFirstChild("KnifeThrown")
+                    local touchRemote = events and events:FindFirstChild("HandleTouched")
+
+                    for _, player in ipairs(Players:GetPlayers()) do
+                        if not getgenv().KnifeKillAll then break end
+                        if player ~= LocalPlayer and player.Character then
+                            local targetChar = player.Character
+                            local targetHum = targetChar:FindFirstChildOfClass("Humanoid")
+                            local targetHRP = targetChar:FindFirstChild("HumanoidRootPart") or targetChar:FindFirstChild("Torso") or targetChar:FindFirstChild("UpperTorso")
+
+                            if targetHum and targetHum.Health > 0 and targetHRP then
+                                if stabRemote then
+                                    pcall(function()
+                                        stabRemote:FireServer(targetHum)
+                                        stabRemote:FireServer(targetHRP)
+                                        stabRemote:FireServer(targetChar)
+                                    end)
+                                end
+                                if touchRemote then
+                                    pcall(function()
+                                        touchRemote:FireServer(targetHRP)
+                                    end)
+                                end
+                                if throwRemote then
+                                    pcall(function()
+                                        throwRemote:FireServer(targetHRP.CFrame, targetHRP.Position)
+                                    end)
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end)
     end
 })
 
