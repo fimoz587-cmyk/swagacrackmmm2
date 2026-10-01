@@ -737,8 +737,8 @@ MiscTab:Toggle({
 -- 7. Вкладка Troll
 TrollTab:Button({
     Title = "Tung Tung Sahur Character",
-    Desc = "Click and you'll turn into Tung Tung Tung Sahur."
-    Callback = function(),
+    Desc = "Click and you'll turn into Tung Tung Tung Sahur.",
+    Callback = function()
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
@@ -838,10 +838,42 @@ if player.Character then
 -- 8. Вкладка Exploits
 RageTab:Toggle({
     Title = "Anti Aim Spin",
-    Desc = "makes the server lag",
+    Desc = "Anti Aim Spin :)",
     Callback = function(state)
         if state then
-            -- [ВСТАВЛЯЙ СВОЙ КОД СЮДА] (сработает при включении)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local spinSpeed = 30
+local spinConnection = nil
+
+local function startSpin(character)
+	if spinConnection then
+		spinConnection:Disconnect()
+		spinConnection = nil
+	end
+
+	local root = character:WaitForChild("HumanoidRootPart", 10)
+	if not root then return end
+
+	spinConnection = RunService.RenderStepped:Connect(function()
+		if character and root and root.Parent then
+			root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(spinSpeed), 0)
+		else
+			if spinConnection then
+				spinConnection:Disconnect()
+				spinConnection = nil
+			end
+		end
+	end)
+end
+
+player.CharacterAdded:Connect(startSpin)
+
+if player.Character then
+	task.spawn(startSpin, player.Character)
+end
         else
             -- [ВСТАВЛЯЙ СВОЙ КОД СЮДА] (сработает при выключении)
         end
