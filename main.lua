@@ -107,6 +107,209 @@ MurderTab:Button({
     end
 })
 
+CosmeticTab:Toggle({
+    Title = "Shaders (Black Sky)",
+    Value = false,
+
+    Callback = function(state)
+        if state then
+            graphicsEnabled = true
+
+            if connection then
+                connection:Disconnect()
+                connection = nil
+            end
+
+            for _, v in ipairs(Lighting:GetChildren()) do
+                if v.Name == "SwagaSky"
+                    or v.Name == "SwagaAtmosphere"
+                    or v.Name == "SwagaColor"
+                    or v.Name == "SwagaBloom"
+                    or v.Name == "SwagaSunRays"
+                    or v.Name == "SwagaDOF"
+                    or v.Name == "SwagaBlur" then
+                    v:Destroy()
+                end
+            end
+
+            local sky = Instance.new("Sky")
+            sky.Name = "SwagaSky"
+
+            local SKY_ID = "rbxassetid://7158024342"
+
+            sky.SkyboxBk = SKY_ID
+            sky.SkyboxDn = SKY_ID
+            sky.SkyboxFt = SKY_ID
+            sky.SkyboxLf = SKY_ID
+            sky.SkyboxRt = SKY_ID
+            sky.SkyboxUp = SKY_ID
+
+            sky.StarCount = 3000
+            sky.SunAngularSize = 8
+            sky.MoonAngularSize = 6
+            sky.Parent = Lighting
+
+            Lighting.Technology = Enum.Technology.Future
+            Lighting.Brightness = 3.8
+            Lighting.ExposureCompensation = 0.2
+            Lighting.GlobalShadows = true
+            Lighting.EnvironmentDiffuseScale = 0.22
+            Lighting.EnvironmentSpecularScale = 1
+            Lighting.Ambient = Color3.fromRGB(95, 98, 110)
+            Lighting.OutdoorAmbient = Color3.fromRGB(145, 150, 165)
+            Lighting.ClockTime = 15.4
+            Lighting.GeographicLatitude = 35
+
+            local atmosphere = Instance.new("Atmosphere")
+            atmosphere.Name = "SwagaAtmosphere"
+            atmosphere.Density = 0.055
+            atmosphere.Offset = 0
+            atmosphere.Color = Color3.fromRGB(210, 220, 240)
+            atmosphere.Decay = Color3.fromRGB(65, 70, 90)
+            atmosphere.Glare = 0.12
+            atmosphere.Haze = 0.22
+            atmosphere.Parent = Lighting
+
+            local cc = Instance.new("ColorCorrectionEffect")
+            cc.Name = "SwagaColor"
+            cc.Brightness = 0.1
+            cc.Contrast = 0.52
+            cc.Saturation = 0.08
+            cc.TintColor = Color3.fromRGB(230, 235, 255)
+            cc.Parent = Lighting
+
+            local bloom = Instance.new("BloomEffect")
+            bloom.Name = "SwagaBloom"
+            bloom.Intensity = 0.8
+            bloom.Size = 36
+            bloom.Threshold = 0.65
+            bloom.Parent = Lighting
+
+            local rays = Instance.new("SunRaysEffect")
+            rays.Name = "SwagaSunRays"
+            rays.Intensity = 0.12
+            rays.Spread = 0.9
+            rays.Parent = Lighting
+
+            local dof = Instance.new("DepthOfFieldEffect")
+            dof.Name = "SwagaDOF"
+            dof.FocusDistance = 80
+            dof.InFocusRadius = 45
+            dof.NearIntensity = 0.015
+            dof.FarIntensity = 0.12
+            dof.Parent = Lighting
+
+            local blur = Instance.new("BlurEffect")
+            blur.Name = "SwagaBlur"
+            blur.Size = 2
+            blur.Parent = Lighting
+
+            local function enhanceEffects(object)
+                if not graphicsEnabled then
+                    return
+                end
+
+                if not (
+                    object:IsA("ParticleEmitter")
+                    or object:IsA("Trail")
+                    or object:IsA("Beam")
+                    or object:IsA("Sparkles")
+                ) then
+                    return
+                end
+
+                if not originalProperties[object] then
+                    if object:IsA("Sparkles") then
+                        originalProperties[object] = {
+                            SparkleColor = object.SparkleColor
+                        }
+                    else
+                        originalProperties[object] = {
+                            LightEmission = object.LightEmission,
+                            LightInfluence = object.LightInfluence,
+                            Brightness = object.Brightness,
+                            ZOffset = object:IsA("ParticleEmitter")
+                                and object.ZOffset
+                                or nil
+                        }
+                    end
+                end
+
+                if object:IsA("ParticleEmitter") then
+                    object.LightEmission = 1
+                    object.LightInfluence = 0
+                    object.Brightness = math.max(object.Brightness, 4)
+                    object.ZOffset = math.clamp(
+                        object.ZOffset + 0.8,
+                        -1,
+                        1
+                    )
+
+                elseif object:IsA("Trail") then
+                    object.LightEmission = 1
+                    object.LightInfluence = 0
+                    object.Brightness = math.max(object.Brightness, 4)
+
+                elseif object:IsA("Beam") then
+                    object.LightEmission = 1
+                    object.LightInfluence = 0
+                    object.Brightness = math.max(object.Brightness, 4)
+
+                elseif object:IsA("Sparkles") then
+                    object.SparkleColor = object.SparkleColor:Lerp(
+                        Color3.new(1, 1, 1),
+                        0.6
+                    )
+                end
+            end
+
+            for _, object in ipairs(Workspace:GetDescendants()) do
+                enhanceEffects(object)
+            end
+
+            connection = Workspace.DescendantAdded:Connect(function(object)
+                task.defer(function()
+                    enhanceEffects(object)
+                end)
+            end)
+
+        else
+            graphicsEnabled = false
+
+            if connection then
+                connection:Disconnect()
+                connection = nil
+            end
+
+            for _, v in ipairs(Lighting:GetChildren()) do
+                if v.Name == "SwagaSky"
+                    or v.Name == "SwagaAtmosphere"
+                    or v.Name == "SwagaColor"
+                    or v.Name == "SwagaBloom"
+                    or v.Name == "SwagaSunRays"
+                    or v.Name == "SwagaDOF"
+                    or v.Name == "SwagaBlur" then
+                    v:Destroy()
+                end
+            end
+
+            for object, props in pairs(originalProperties) do
+                if object and object.Parent then
+                    for propName, value in pairs(props) do
+                        if value ~= nil then
+                            pcall(function()
+                                object[propName] = value
+                            end)
+                        end
+                    end
+                end
+            end
+
+            table.clear(originalProperties)
+        end
+    end
+})
+
 
 -- 3. Вкладка Cosmetic
 CosmeticTab:Toggle({
