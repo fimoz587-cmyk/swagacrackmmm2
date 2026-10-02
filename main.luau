@@ -16,7 +16,7 @@ local Window = WindUI:CreateWindow({
 local SherifTab = Window:Tab({ Title = "Sherif", Icon = "shield" })
 local MurderTab = Window:Tab({ Title = "Murder", Icon = "skull" })
 local CosmeticTab = Window:Tab({ Title = "Cosmetic", Icon = "sparkles" })
-local HighlightsTab = Window:Tab({ Title = "Highlights", Icon = "eye" })
+local HighlightsTab = Window:Tab({ Title = "Visuals", Icon = "eye" })
 local MiscTab = Window:Tab({ Title = "Misc", Icon = "component" })
 local TrollTab = Window:Tab({ Title = "Troll", Icon = "laugh" })
 local RageTab = Window:Tab({ Title = "Rage", Icon = "zap" })
@@ -28,7 +28,7 @@ local SettingsTab = Window:Tab({ Title = "Settings", Icon = "settings" })
 
 -- 1. Вкладка Sherif
 SherifTab:Toggle({
-    Title = "Функция для Шерифа",
+    Title = "Slient Aim (Button)",
     Callback = function(state)
         if state then
             -- [ВСТАВЛЯЙ СВОЙ КОД СЮДА] (сработает при включении)
@@ -40,7 +40,7 @@ SherifTab:Toggle({
 
 -- WindUI Button
 MurderTab:Button({
-    Title = "Knife Kill All",
+    Title = "Kill All",
     Callback = function()
         local Players = game:GetService("Players")
         local LocalPlayer = Players.LocalPlayer
@@ -52,8 +52,8 @@ MurderTab:Button({
 
         if not knife then
             WindUI:Notify({
-                Title = "Ошибка",
-                Content = "У вас нет ножа! Функция работает только за Убийцу.",
+                Title = "Error",
+                Content = "There is no knife",
                 Duration = 3
             })
             return
@@ -100,7 +100,7 @@ MurderTab:Button({
         end
 
         WindUI:Notify({
-            Title = "&a✔️ Successful",
+            Title = "Successful",
             Content = "All Player Killed",
             Duration = 3
         })
@@ -110,7 +110,7 @@ MurderTab:Button({
 
 -- 3. Вкладка Cosmetic
 CosmeticTab:Toggle({
-    Title = "Angel Wing",
+    Title = "Angel Wing (bad)",
     Callback = function(state)
         if state then
 local Players = game:GetService("Players")
@@ -367,7 +367,7 @@ end
 })
 
 CosmeticTab:Toggle({
-    Title = "Angel Crown",
+    Title = "Angel Crown (Not Work)",
     Callback = function(state)
         if state then
 local Players = game:GetService("Players")
@@ -884,15 +884,15 @@ end
 
 for _, conn in ipairs(game:GetService("RunService").RenderStepped:GetConnections()) do
 	conn:Disconnect()
-                end
-            end
+	end
+end
         end
-    end
+	end
 })
 
 -- 9. Вкладка Settings
 SettingsTab:Dropdown({
-    Title = "Выбрать тему интерфейса",
+    Title = "Выбрать theme interface",
     Values = {
         "Dark", "Light", "Sky", "Rose", "Plant", "Red", "Indigo", 
         "Violet", "Amber", "Emerald", "Midnight", "Crimson", 
@@ -905,7 +905,7 @@ SettingsTab:Dropdown({
         
         -- Выводим красивое уведомление о смене стиля
         WindUI:Notify({
-            Title = "Интерфейс",
+            Title = "Interface",
             Content = "Установлена тема: " .. selectedTheme,
             Duration = 2
         })
