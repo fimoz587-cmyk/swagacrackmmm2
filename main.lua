@@ -1075,22 +1075,22 @@ if player.Character then
 	task.spawn(startSpin, player.Character)
 end
         else
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
+            local Players = game:GetService("Players")
+            local player = Players.LocalPlayer
 
-if player.Character then
-	local root = player.Character:FindFirstChild("HumanoidRootPart")
-	if root then
-		root.CFrame = CFrame.new(root.CFrame.Position)
-	end
-end
+            if player.Character then
+                local root = player.Character:FindFirstChild("HumanoidRootPart")
+                if root then
+                    root.CFrame = CFrame.new(root.CFrame.Position)
+                end
+            end
 
-for _, conn in ipairs(game:GetService("RunService").RenderStepped:GetConnections()) do
-	conn:Disconnect()
-	end
-end
+            if spinConnection then
+                spinConnection:Disconnect()
+                spinConnection = nil
+            end
         end
-	end
+    end
 })
 
 -- 9. Вкладка Settings
