@@ -1076,7 +1076,7 @@ end
             local Players = game:GetService("Players")
             local player = Players.LocalPlayer
 
-            if player.Character me then
+            if player.Character then
                 local root = player.Character:FindFirstChild("HumanoidRootPart")
                 if root then
                     root.CFrame = CFrame.new(root.CFrame.Position)
