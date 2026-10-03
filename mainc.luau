@@ -284,7 +284,6 @@ RunService.RenderStepped:Connect(function()
     end
 
 end)
-
 --// PING
 task.spawn(function()
 
@@ -370,6 +369,68 @@ UserInputService.InputChanged:Connect(function(input)
     end
 
 end)
+--// SUBTLE ICON ANIMATION
+local TweenService = game:GetService("TweenService")
+
+local Icons = {
+    Main:FindFirstChildOfClass("ImageLabel")
+}
+
+-- Находим все ImageLabel внутри watermark
+local function animateIcon(icon)
+    if not icon then
+        return
+    end
+
+    local originalPosition = icon.Position
+
+    task.spawn(function()
+        while icon.Parent do
+
+            local up = TweenService:Create(
+                icon,
+                TweenInfo.new(
+                    1.2,
+                    Enum.EasingStyle.Sine,
+                    Enum.EasingDirection.InOut
+                ),
+                {
+                    Position = UDim2.new(
+                        originalPosition.X.Scale,
+                        originalPosition.X.Offset,
+                        originalPosition.Y.Scale,
+                        originalPosition.Y.Offset - 1
+                    )
+                }
+            )
+
+            local down = TweenService:Create(
+                icon,
+                TweenInfo.new(
+                    1.2,
+                    Enum.EasingStyle.Sine,
+                    Enum.EasingDirection.InOut
+                ),
+                {
+                    Position = originalPosition
+                }
+            )
+
+            up:Play()
+            up.Completed:Wait()
+
+            down:Play()
+            down.Completed:Wait()
+        end
+    end)
+end
+
+-- Анимируем все иконки
+for _, object in ipairs(Main:GetChildren()) do
+    if object:IsA("ImageLabel") then
+        animateIcon(object)
+    end
+end
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local RS = game:GetService("ReplicatedStorage")
