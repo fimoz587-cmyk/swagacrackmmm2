@@ -445,7 +445,7 @@ local CFG = {
     box = true, skeleton = true, highlight = true, name = true, dist = true,
     tracer = true, health = true, gun = true,
     maxDist = 800, skelDist = 150,
-    silent = true, lead = 0.1,
+    silent = true, lead = 0.30,
     autoGun = true,
     spam = true, allRemotes = true, skipFilter = true,
     tp = false, hitDelay = 0.25, maxTries = 3,
