@@ -4,7 +4,7 @@ local Window = WindUI:CreateWindow({
     Title = "Swaga Hub | Murder Mystery 2",
     Author = "Create by @AnalogyScript",        
     Theme = "Sky", 
-    Icon = "rbxassetid://136657221209337",
+    Icon = "rbxassetid://13936134740",
     Size = UDim2.fromOffset(580, 460),
     ToggleKey = Enum.KeyCode.RightShift -- Открыть/закрыть меню на правый Shift
 })
