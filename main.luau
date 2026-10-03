@@ -1,8 +1,8 @@
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
 local Window = WindUI:CreateWindow({
-    Title = "Crack Murder Mystery 2",
-    Author = "Cracked by @AnalogyScript",        
+    Title = "Swaga Hub | Murder Mystery 2",
+    Author = "Create by @AnalogyScript",        
     Theme = "Sky", 
     Icon = "rbxassetid://136657221209337",
     Size = UDim2.fromOffset(580, 460),
@@ -1116,7 +1116,7 @@ SettingsTab:Dropdown({
 })
 
 WindUI:Notify({
-    Title = "Please, don't ignore this message.",
-    Content = "You’re using the cracked version, which has limited functionality. If you want access to more features, purchase Swaga Hub for Murder Mystery 2.",
+    Title = "Successfully loaded Swaga Hub.",
+    Content = "@AnalogyScript",
     Time = 20
 })
