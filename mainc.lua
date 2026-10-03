@@ -1,3 +1,47 @@
+-- Roblox / любая игра: Nyx Shaders, синий туман, без меню (Lua, клиент, Delta)
+local Lighting = game:GetService("Lighting")
+
+local FOG_END, DENSITY = 500, 0.65
+local BLOOM, CONTRAST, SAT, DOF, BRIGHT = 2.8, 0.45, 0.4, 0.22, 2.10
+local TINT = Color3.fromRGB(190, 215, 255)
+local AMB = Color3.fromRGB(40, 80, 170)
+local FOG = Color3.fromRGB(25, 70, 200)
+
+for _, v in ipairs(Lighting:GetChildren()) do
+    if v:IsA("PostEffect") or v:IsA("Atmosphere") or v:IsA("Sky") then v:Destroy() end
+end
+
+local bloom = Instance.new("BloomEffect", Lighting)
+local cc = Instance.new("ColorCorrectionEffect", Lighting)
+local rays = Instance.new("SunRaysEffect", Lighting)
+local dof = Instance.new("DepthOfFieldEffect", Lighting)
+local atm = Instance.new("Atmosphere", Lighting)
+local sky = Instance.new("Sky", Lighting)
+sky.StarCount = 0
+sky.CelestialBodiesShown = false
+
+local function apply()
+    bloom.Intensity, bloom.Size, bloom.Threshold = BLOOM, 45, 0.75
+    cc.Contrast, cc.Saturation, cc.TintColor = CONTRAST, SAT, TINT
+    rays.Intensity, rays.Spread = 0.15, 0.8
+    dof.FarIntensity, dof.NearIntensity = DOF, 0
+    dof.FocusDistance, dof.InFocusRadius = 60, 80
+    atm.Density, atm.Haze, atm.Offset = DENSITY, 2, 0.2
+    atm.Color, atm.Decay = FOG, FOG
+    Lighting.Ambient, Lighting.OutdoorAmbient = AMB, AMB
+    Lighting.Brightness = BRIGHT
+    Lighting.ExposureCompensation = 0.3
+    Lighting.FogColor, Lighting.FogStart, Lighting.FogEnd = FOG, 0, FOG_END
+    Lighting.ClockTime = 0
+end
+
+apply()
+task.spawn(function() -- игры любят сбрасывать освещение
+    while true do
+        apply()
+        task.wait(1)
+    end
+end)
 --// SWAGA.CC WATERMARK
 
 local Players = game:GetService("Players")
