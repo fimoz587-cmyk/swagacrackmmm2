@@ -1,3 +1,331 @@
+--// SWAGA.CC WATERMARK
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local LocalPlayer = Players.LocalPlayer
+
+--// ICONS
+local FPS_ICON = "rbxassetid://11395830213"
+local PING_ICON = "rbxassetid://105127187178989"
+local TIME_ICON = "rbxassetid://75946779176337"
+local USER_ICON = "rbxassetid://128851059336118"
+local PRODUCT_ICON = "rbxassetid://111429937040741"
+
+--// COLORS
+local DARK_BLUE = Color3.fromRGB(35, 90, 155)
+local TEXT_COLOR = Color3.fromRGB(210, 225, 245)
+local TITLE_COLOR = Color3.fromRGB(70, 135, 210)
+
+--// GUI
+local WatermarkGui = Instance.new("ScreenGui")
+WatermarkGui.Name = "SwagaWatermark"
+WatermarkGui.ResetOnSpawn = false
+WatermarkGui.IgnoreGuiInset = true
+WatermarkGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+WatermarkGui.Parent = game:GetService("CoreGui")
+
+--// MAIN
+local Main = Instance.new("Frame")
+Main.Name = "Main"
+
+--// Compact size
+Main.Size = UDim2.new(0, 350, 0, 32)
+Main.Position = UDim2.new(0, 15, 0, 15)
+
+Main.BackgroundColor3 = Color3.fromRGB(5, 13, 28)
+Main.BackgroundTransparency = 0.5
+Main.BorderSizePixel = 0
+Main.Active = true
+Main.Parent = WatermarkGui
+
+--// CORNER
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0, 8)
+Corner.Parent = Main
+
+--// OUTLINE
+local Stroke = Instance.new("UIStroke")
+Stroke.Color = Color3.fromRGB(25, 70, 135)
+Stroke.Transparency = 0.4
+Stroke.Thickness = 1
+Stroke.Parent = Main
+
+--// SWAGA.CC
+local Title = Instance.new("TextLabel")
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0, 8, 0, 0)
+Title.Size = UDim2.new(0, 62, 1, 0)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "swaga.cc"
+Title.TextColor3 = TITLE_COLOR
+Title.TextSize = 11
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = Main
+
+--// INFO CREATOR
+local function createInfo(iconId, text, x, width)
+
+    local Icon = Instance.new("ImageLabel")
+    Icon.BackgroundTransparency = 1
+    Icon.Position = UDim2.new(0, x, 0.5, -6)
+    Icon.Size = UDim2.new(0, 12, 0, 12)
+
+    --// Dark blue icon
+    Icon.Image = iconId
+    Icon.ImageColor3 = DARK_BLUE
+    Icon.ImageTransparency = 0
+
+    Icon.Parent = Main
+
+    local Label = Instance.new("TextLabel")
+    Label.BackgroundTransparency = 1
+    Label.Position = UDim2.new(0, x + 15, 0, 0)
+    Label.Size = UDim2.new(0, width, 1, 0)
+
+    Label.Font = Enum.Font.GothamMedium
+    Label.Text = text
+    Label.TextColor3 = TEXT_COLOR
+    Label.TextSize = 9
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+
+    Label.Parent = Main
+
+    return Label
+end
+
+--// FPS
+--// Speedometer + FPS number
+local FPSLabel = createInfo(
+    FPS_ICON,
+    "0 FPS",
+    70,
+    48
+)
+
+--// PING
+local PingLabel = createInfo(
+    PING_ICON,
+    "0ms",
+    121,
+    42
+)
+
+--// TIME
+local TimeLabel = createInfo(
+    TIME_ICON,
+    "00:00",
+    166,
+    42
+)
+
+--// USER ICON
+local UserIcon = Instance.new("ImageLabel")
+UserIcon.BackgroundTransparency = 1
+
+UserIcon.Position = UDim2.new(
+    0,
+    211,
+    0.5,
+    -6
+)
+
+UserIcon.Size = UDim2.new(0, 12, 0, 12)
+
+UserIcon.Image = USER_ICON
+
+--// Dark blue
+UserIcon.ImageColor3 = DARK_BLUE
+UserIcon.ImageTransparency = 0
+
+UserIcon.Parent = Main
+
+--// USERNAME
+local UsernameLabel = Instance.new("TextLabel")
+UsernameLabel.BackgroundTransparency = 1
+
+UsernameLabel.Position = UDim2.new(
+    0,
+    227,
+    0,
+    0
+)
+
+UsernameLabel.Size = UDim2.new(
+    0,
+    58,
+    1,
+    0
+)
+
+UsernameLabel.Font = Enum.Font.GothamMedium
+UsernameLabel.Text = LocalPlayer.Name
+UsernameLabel.TextColor3 = TEXT_COLOR
+UsernameLabel.TextSize = 9
+UsernameLabel.TextXAlignment = Enum.TextXAlignment.Left
+UsernameLabel.TextTruncate = Enum.TextTruncate.AtEnd
+
+UsernameLabel.Parent = Main
+
+--// PRODUCT ICON
+local ProductIcon = Instance.new("ImageLabel")
+ProductIcon.BackgroundTransparency = 1
+
+--// Moved closer to username
+ProductIcon.Position = UDim2.new(
+    0,
+    285,
+    0.5,
+    -6
+)
+
+ProductIcon.Size = UDim2.new(
+    0,
+    12,
+    0,
+    12
+)
+
+ProductIcon.Image = PRODUCT_ICON
+
+--// Dark blue
+ProductIcon.ImageColor3 = DARK_BLUE
+ProductIcon.ImageTransparency = 0
+
+ProductIcon.Parent = Main
+
+--// PRODUCT
+local ProductLabel = Instance.new("TextLabel")
+ProductLabel.BackgroundTransparency = 1
+
+--// Moved closer to username
+ProductLabel.Position = UDim2.new(
+    0,
+    301,
+    0,
+    0
+)
+
+ProductLabel.Size = UDim2.new(
+    0,
+    42,
+    1,
+    0
+)
+
+ProductLabel.Font = Enum.Font.GothamMedium
+ProductLabel.Text = "Free"
+ProductLabel.TextColor3 = TEXT_COLOR
+ProductLabel.TextSize = 9
+ProductLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+ProductLabel.Parent = Main
+
+--// FPS CALCULATION
+local frames = 0
+local lastTime = tick()
+
+RunService.RenderStepped:Connect(function()
+
+    frames += 1
+
+    if tick() - lastTime >= 1 then
+
+        FPSLabel.Text = tostring(frames) .. " FPS"
+
+        frames = 0
+        lastTime = tick()
+
+    end
+
+end)
+
+--// PING
+task.spawn(function()
+
+    while task.wait(1) do
+
+        local ping = math.floor(
+            LocalPlayer:GetNetworkPing() * 1000
+        )
+
+        PingLabel.Text = tostring(ping) .. "ms"
+
+    end
+
+end)
+
+--// TIME
+task.spawn(function()
+
+    while task.wait(1) do
+
+        TimeLabel.Text = os.date("%H:%M")
+
+    end
+
+end)
+
+--// DRAG SYSTEM
+local dragging = false
+local dragStart
+local startPos
+
+local function updateDrag(input)
+
+    local delta = input.Position - dragStart
+
+    Main.Position = UDim2.new(
+
+        startPos.X.Scale,
+        startPos.X.Offset + delta.X,
+
+        startPos.Y.Scale,
+        startPos.Y.Offset + delta.Y
+
+    )
+
+end
+
+--// Mouse / Touch start
+Main.InputBegan:Connect(function(input)
+
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+
+        dragging = true
+
+        dragStart = input.Position
+        startPos = Main.Position
+
+        input.Changed:Connect(function()
+
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+
+        end)
+
+    end
+
+end)
+
+--// Mouse / Touch movement
+UserInputService.InputChanged:Connect(function(input)
+
+    if not dragging then
+        return
+    end
+
+    if input.UserInputType == Enum.UserInputType.MouseMovement
+        or input.UserInputType == Enum.UserInputType.Touch then
+
+        updateDrag(input)
+
+    end
+
+end)
 -- Загрузка библиотеки WindUI
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
