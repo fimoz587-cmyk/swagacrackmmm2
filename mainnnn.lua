@@ -181,7 +181,19 @@ task.spawn(function()
     end
 end)               
         else
-            -- КОД ДЛЯ ВЫКЛЮЧЕНИЯ
+CFG.autoGun = false
+running = false
+
+for _, c in ipairs(conns) do
+    pcall(function()
+        c:Disconnect()
+    end)
+end
+
+table.clear(conns)
+
+moving = false
+busy = false
         end
     end
 })
