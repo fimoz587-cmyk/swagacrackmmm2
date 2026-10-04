@@ -203,9 +203,68 @@ SheriffTab:Toggle({
     Value = false,
     Callback = function(Value)
         if Value then
-            -- КОД ДЛЯ ВКЛЮЧЕНИЯ
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local lp = Players.LocalPlayer
+
+local CFG = {
+    wallbang = true -- Сразу включено
+}
+
+local conns = {}
+local function connect(sig, fn)
+    local c = sig:Connect(fn)
+    conns[#conns + 1] = c
+    return c
+end
+
+local isWallBangActive = false
+local rp = RaycastParams.new()
+rp.FilterType = Enum.RaycastFilterType.Exclude
+
+-- Поиск Убийцы (Murderer) на карте
+local function findMurderer()
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= lp then
+            local c = p.Character
+            local hum = c and c:FindFirstChildOfClass("Humanoid")
+            local hrp = c and c:FindFirstChild("HumanoidRootPart")
+            if hum and hum.Health > 0 and hrp and (c:FindFirstChild("Knife")) then
+                return hrp, c
+            end
+        end
+    end
+end
+
+-- Проверка преграды (стены) между вами и целью
+connect(RunService.Heartbeat, function()
+    local hrp, char = findMurderer()
+    if not hrp or not CFG.wallbang then
+        isWallBangActive = false
+        return
+    end
+
+    local mine = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+    if mine then
+        rp.FilterDescendantsInstances = {lp.Character, char}
+        -- Если луч сталкивается со стеной, значит цель за стеной (WallBang активен)
+        local blocked = workspace:Raycast(mine.Position, hrp.Position - mine.Position, rp) ~= nil
+        isWallBangActive = blocked
+    else
+        isWallBangActive = false
+    end
+end)                
         else
-            -- КОД ДЛЯ ВЫКЛЮЧЕНИЯ
+CFG.wallbang = false
+isWallBangActive = false
+
+for _, c in ipairs(conns) do
+    pcall(function()
+        c:Disconnect()
+    end)
+end
+
+table.clear(conns)
         end
     end
 })
