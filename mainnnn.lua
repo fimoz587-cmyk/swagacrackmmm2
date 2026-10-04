@@ -40,7 +40,146 @@ SheriffTab:Toggle({
     Value = false,
     Callback = function(Value)
         if Value then
-            -- КОД ДЛЯ ВКЛЮЧЕНИЯ
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local RS = game:GetService("ReplicatedStorage")
+local lp = Players.LocalPlayer
+
+local CFG = {
+    autoGun = true, -- Сразу включено
+    gunSpeed = 32,
+    pickDist = 90,
+}
+
+local conns, running = {}, true
+local function connect(sig, fn)
+    local c = sig:Connect(fn)
+    conns[#conns + 1] = c
+    return c
+end
+
+local myRole
+local drop
+local busy, moving = false, false
+
+local function myHrp()
+    local c = lp.Character
+    return c and c:FindFirstChild("HumanoidRootPart"), c and c:FindFirstChildOfClass("Humanoid")
+end
+
+local function touch(a, b)
+    if firetouchinterest then
+        firetouchinterest(a, b, 0)
+        firetouchinterest(a, b, 1)
+    end
+end
+
+local function hasKnife()
+    local c = lp.Character
+    return (c and c:FindFirstChild("Knife")) or (lp.Backpack and lp.Backpack:FindFirstChild("Knife"))
+end
+
+local function readData(tbl)
+    if typeof(tbl) ~= "table" then return end
+    for k, d in pairs(tbl) do
+        local p = typeof(k) == "Instance" and k or Players:FindFirstChild(tostring(k))
+        local role = typeof(d) == "table" and (d.Role or d.role)
+        if p == lp and role then myRole = role end
+    end
+end
+
+for _, r in ipairs(RS:GetDescendants()) do
+    pcall(function()
+        if r:IsA("RemoteEvent") and r.Name == "PlayerDataChanged" then
+            connect(r.OnClientEvent, function(...) readData((...)) end)
+        elseif r:IsA("RemoteEvent") and r.Name == "LoadingMap" then
+            connect(r.OnClientEvent, function() myRole = nil end)
+        elseif r:IsA("RemoteFunction") and r.Name == "GetPlayerData" then
+            task.spawn(function()
+                local ok, res = pcall(function() return r:InvokeServer() end)
+                if ok then readData(res) end
+            end)
+        end
+    end)
+end
+
+local function posOf(i)
+    if i:IsA("BasePart") then return i end
+    return i:FindFirstChildWhichIsA("BasePart", true)
+end
+
+local function trackDrop(i)
+    if i.Name ~= "GunDrop" or drop == i then return end
+    drop = i
+    connect(i.AncestryChanged, function(_, parent)
+        if not parent and drop == i then drop = nil end
+    end)
+end
+
+connect(workspace.DescendantAdded, trackDrop)
+for _, d in ipairs(workspace:GetDescendants()) do trackDrop(d) end
+
+connect(RunService.Stepped, function()
+    if not moving then return end
+    local c = lp.Character
+    if not c then return end
+    for _, p in ipairs(c:GetChildren()) do
+        if p:IsA("BasePart") then p.CanCollide = false end
+    end
+end)
+
+local function goTo(cf, speed, keep)
+    local hrp, hum = myHrp()
+    if not hrp or not hum or hum.Health <= 0 then return false end
+    local t = math.max((hrp.Position - cf.Position).Magnitude / speed, 0.05)
+    local tw = TweenService:Create(hrp, TweenInfo.new(t, Enum.EasingStyle.Linear), {CFrame = cf})
+    local done = false
+    local cc = tw.Completed:Connect(function() done = true end)
+    moving = true
+    tw:Play()
+    local s = tick()
+    while not done and tick() - s < t + 1 and running do
+        if hum.Health <= 0 or (keep and not keep()) then break end
+        task.wait()
+    end
+    tw:Cancel()
+    cc:Disconnect()
+    moving = false
+    if hrp.Parent then hrp.AssemblyLinearVelocity = Vector3.zero end
+    return done
+end
+
+local lastPick = 0
+local function pickGun()
+    local hrp, hum = myHrp()
+    if busy or not hrp or not hum or hum.Health <= 0 then return end
+    if not (lp.Character and lp.Character.Parent == workspace) then return end
+    if not (drop and drop.Parent) then return end
+    if myRole == nil or myRole == "Murderer" or hasKnife() then return end
+    if tick() - lastPick < 3 then return end
+    local part = posOf(drop)
+    if not part or (part.Position - hrp.Position).Magnitude > CFG.pickDist then return end
+    busy = true
+    lastPick = tick()
+    local back = hrp.CFrame
+    local ok = goTo(CFrame.new(part.Position + Vector3.new(0, 1.5, 0)), CFG.gunSpeed, function() return CFG.autoGun end)
+    if ok then
+        touch(hrp, part)
+        task.wait(0.25)
+    end
+    if hum.Health > 0 and hrp.Parent then
+        goTo(back, CFG.gunSpeed, function() return true end)
+    end
+    busy = false
+end
+
+task.spawn(function()
+    while running do
+        if CFG.autoGun and drop then pcall(pickGun) end
+        task.wait(0.15)
+    end
+end)               
         else
             -- КОД ДЛЯ ВЫКЛЮЧЕНИЯ
         end
@@ -92,6 +231,158 @@ CosmeticTab:Toggle({
         end
     end
 })
+
+-- Создание вкладки: AUTO FARM
+local AutoFarmTab = Window:Tab({ Title = "Auto Farm", Icon = "coins" })
+
+-- Тоггл внутри вкладки
+AutoFarmTab:Toggle({
+    Title = "Auto Farm Coins",
+    Value = false,
+    Callback = function(Value)
+        CFG.farm = Value -- Меняет значение в настройках для цикла
+        
+        if Value then
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local RS = game:GetService("ReplicatedStorage")
+local lp = Players.LocalPlayer
+
+local CFG = {
+    farm = true, -- Сразу включено
+    farmSpeed = 24,
+    maxCoins = 40,
+    coinRange = 1500,
+}
+
+local conns, running = {}, true
+local function connect(sig, fn)
+    local c = sig:Connect(fn)
+    conns[#conns + 1] = c
+    return c
+end
+
+local coins, visited = {}, {}
+local got = 0
+local busy, moving = false, false
+
+local function myHrp()
+    local c = lp.Character
+    return c and c:FindFirstChild("HumanoidRootPart"), c and c:FindFirstChildOfClass("Humanoid")
+end
+
+local function touch(a, b)
+    if firetouchinterest then
+        firetouchinterest(a, b, 0)
+        firetouchinterest(a, b, 1)
+    end
+end
+
+connect(RS:GetDescendants(), function()
+    for _, r in ipairs(RS:GetDescendants()) do
+        if r:IsA("RemoteEvent") and r.Name == "LoadingMap" then
+            connect(r.OnClientEvent, function()
+                got = 0
+                table.clear(visited)
+            end)
+        end
+    end
+end)
+
+local function isCoin(i)
+    return i:IsA("BasePart") and (i.Name == "Coin_Server" or (i.Parent and i.Parent.Name == "CoinContainer"))
+end
+
+local function addCoin(i)
+    if coins[i] or not isCoin(i) then return end
+    coins[i] = true
+end
+
+connect(workspace.DescendantAdded, addCoin)
+connect(workspace.DescendantRemoving, function(i)
+    if not coins[i] then return end
+    coins[i], visited[i] = nil, nil
+end)
+
+for _, d in ipairs(workspace:GetDescendants()) do addCoin(d) end
+
+connect(RunService.Stepped, function()
+    if not moving then return end
+    local c = lp.Character
+    if not c then return end
+    for _, p in ipairs(c:GetChildren()) do
+        if p:IsA("BasePart") then p.CanCollide = false end
+    end
+end)
+
+local function goTo(cf, speed)
+    local hrp, hum = myHrp()
+    if not hrp or not hum or hum.Health <= 0 then return false end
+    local t = math.max((hrp.Position - cf.Position).Magnitude / speed, 0.05)
+    local tw = TweenService:Create(hrp, TweenInfo.new(t, Enum.EasingStyle.Linear), {CFrame = cf})
+    local done = false
+    local cc = tw.Completed:Connect(function() done = true end)
+    moving = true
+    tw:Play()
+    local s = tick()
+    while not done and tick() - s < t + 1 and running do
+        if hum.Health <= 0 or not CFG.farm then break end
+        task.wait()
+    end
+    tw:Cancel()
+    cc:Disconnect()
+    moving = false
+    if hrp.Parent then hrp.AssemblyLinearVelocity = Vector3.zero end
+    return done
+end
+
+local function farmStep()
+    local hrp, hum = myHrp()
+    if busy or not hrp or not hum or hum.Health <= 0 then return end
+    if got >= CFG.maxCoins then return end
+    
+    local best, bd = nil, CFG.coinRange
+    for c in pairs(coins) do
+        if c.Parent and not visited[c] then
+            local d = (c.Position - hrp.Position).Magnitude
+            if d < bd then best, bd = c, d end
+        end
+    end
+    
+    if not best then return end
+    busy = true
+    local ok = goTo(CFrame.new(best.Position + Vector3.new(0, 1.5, 0)), CFG.farmSpeed)
+    if ok and best.Parent then
+        touch(hrp, best)
+        task.wait(0.2)
+        if not best.Parent then got += 1 end
+    end
+    visited[best] = true
+    busy = false
+end
+
+task.spawn(function()
+    while running do
+        if CFG.farm then pcall(farmStep) end
+        task.wait(0.15)
+    end
+end)              
+        else
+CFG.farm = false
+running = false
+
+for _, c in ipairs(conns) do
+    pcall(function()
+        c:Disconnect()
+    end)
+end
+
+table.clear(conns)
+        end
+    end
+})
+
 
 -- ========================================================
 -- ВКЛАДКА: VISUALS
