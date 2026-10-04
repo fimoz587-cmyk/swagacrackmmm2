@@ -215,14 +215,40 @@ SheriffTab:Toggle({
 -- ========================================================
 local MurderTab = Window:Tab({ Title = "Murder", Icon = "skull" })
 
-MurderTab:Toggle({
+MurderTab:Button({
     Title = "Kill All",
     Value = false,
     Callback = function(Value)
         if Value then
-            -- КОД ДЛЯ ВКЛЮЧЕНИЯ
-        else
-            -- КОД ДЛЯ ВЫКЛЮЧЕНИЯ
+       local char = LocalPlayer.Character
+        local backpack = LocalPlayer:FindFirstChild("Backpack")
+        local knife = (char and char:FindFirstChild("Knife")) or (backpack and backpack:FindFirstChild("Knife"))
+        if not knife then
+            WindUI:Notify({ Title = "Ошибка", Content = "Нож не найден!", Duration = 3 })
+            return
+        end
+        if knife.Parent == backpack and char:FindFirstChildOfClass("Humanoid") then
+            char:FindFirstChildOfClass("Humanoid"):EquipTool(knife)
+            task.wait(0.05)
+        end
+        local events = knife:FindFirstChild("Events")
+        local stabRemote = events and events:FindFirstChild("KnifeStabbed")
+        local touchRemote = events and events:FindFirstChild("HandleTouched")
+
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character then
+                local targetChar = player.Character
+                local targetHum = targetChar:FindFirstChildOfClass("Humanoid")
+                local targetHRP = targetChar:FindFirstChild("HumanoidRootPart") or targetChar:FindFirstChild("Torso")
+                if targetHum and targetHum.Health > 0 and targetHRP then
+                    if stabRemote then pcall(function() stabRemote:FireServer(targetHum); stabRemote:FireServer(targetHRP) end) end
+                    if touchRemote then pcall(function() touchRemote:FireServer(targetHRP) end) end
+                end
+            end
+        end
+        WindUI:Notify({ Title = "Успешно", Content = "Все игроки уничтожены", Duration = 3 })
+    end
+})
         end
     end
 })
