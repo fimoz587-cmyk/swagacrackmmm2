@@ -28,9 +28,136 @@ SheriffTab:Toggle({
     Value = false,
     Callback = function(Value)
         if Value then
-            -- КОД ДЛЯ ВКЛЮЧЕНИЯ
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local RS = game:GetService("ReplicatedStorage")
+local Stats = game:GetService("Stats")
+local lp = Players.LocalPlayer
+
+local genv = (getgenv and getgenv()) or _G
+if genv.NyxSA then pcall(genv.NyxSA) end
+
+local CFG = {
+    silent = true,
+    lead = 0.05,
+    pingLead = true,
+}
+
+local ST = genv.NyxSAST or {}
+genv.NyxSAST = ST
+ST.on, ST.aimPos = CFG.silent, nil
+
+if not genv.NyxSAHook and hookmetamethod and getnamecallmethod then
+    genv.NyxSAHook = true
+    local wrap = newcclosure or function(f) return f end
+    local old
+    old = hookmetamethod(game, "__namecall", wrap(function(self, ...)
+        local m = getnamecallmethod()
+        if ST.on and ST.aimPos and m == "FireServer" and not checkcaller()
+           and typeof(self) == "Instance" and self.Name == "Shoot" then
+            local par = self.Parent
+            if par and par.Name == "Gun" then
+                local args = table.pack(...)
+                local n = 0
+                for i = 1, args.n do
+                    if typeof(args[i]) == "CFrame" then
+                        n += 1
+                        if n == 2 then
+                            args[i] = CFrame.new(ST.aimPos)
+                            break
+                        end
+                    end
+                end
+                if setnamecallmethod then setnamecallmethod(m) end
+                return old(self, table.unpack(args, 1, args.n))
+            end
+        end
+        return old(self, ...)
+    end))
+end
+
+local roles = {}
+local conns = {}
+local running = true
+
+local function connect(sig, fn)
+    local c = sig:Connect(fn)
+    conns[#conns + 1] = c
+    return c
+end
+
+local function readData(tbl)
+    if typeof(tbl) ~= "table" then return end
+    for k, d in pairs(tbl) do
+        local p = typeof(k) == "Instance" and k or Players:FindFirstChild(tostring(k))
+        local role = typeof(d) == "table" and (d.Role or d.role)
+        if p and role then roles[p] = role end
+    end
+end
+
+for _, r in ipairs(RS:GetDescendants()) do
+    pcall(function()
+        if r:IsA("RemoteEvent") and r.Name == "PlayerDataChanged" then
+            connect(r.OnClientEvent, function(...) readData((...)) end)
+        elseif r:IsA("RemoteEvent") and r.Name == "LoadingMap" then
+            connect(r.OnClientEvent, function() table.clear(roles) end)
+        elseif r:IsA("RemoteFunction") and r.Name == "GetPlayerData" then
+            task.spawn(function()
+                local ok, res = pcall(function() return r:InvokeServer() end)
+                if ok then readData(res) end
+            end)
+        end
+    end)
+end
+
+task.spawn(function()
+    while running do
+        pcall(function()
+            ST.ping = Stats.Network.ServerStatsItem["Data Ping"]:GetValue() / 1000
+        end)
+        task.wait(0.5)
+    end
+end)
+
+local function findMurderer()
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= lp then
+            local c = p.Character
+            local hum = c and c:FindFirstChildOfClass("Humanoid")
+            local hrp = c and c:FindFirstChild("HumanoidRootPart")
+            if hum and hum.Health > 0 and hrp
+               and (roles[p] == "Murderer" or c:FindFirstChild("Knife")) then
+                return hrp, c
+            end
+        end
+    end
+end
+
+connect(RunService.Heartbeat, function()
+    ST.on = CFG.silent
+    local hrp = findMurderer()
+    if not hrp then
+        ST.aimPos = nil
+        return
+    end
+    local v = hrp.AssemblyLinearVelocity
+    local t = (CFG.pingLead and (ST.ping or 0.08) or 0) + CFG.lead
+    local pos = hrp.Position
+    ST.aimPos = pos + Vector3.new(v.X, 0, v.Z) * t
+end)                
         else
-            -- КОД ДЛЯ ВЫКЛЮЧЕНИЯ
+CFG.silent = false
+ST.on = false
+ST.aimPos = nil
+running = false
+
+for _, c in ipairs(conns) do
+    pcall(function()
+        c:Disconnect()
+    end)
+end
+
+table.clear(conns)            
         end
     end
 })
@@ -322,9 +449,59 @@ CosmeticTab:Toggle({
     Value = false,
     Callback = function(Value)
         if Value then
-            -- КОД ДЛЯ ВКЛЮЧЕНИЯ
-        else
-            -- КОД ДЛЯ ВЫКЛЮЧЕНИЯ
+-- Roblox / любая игра: Nyx Shaders, синий туман, без меню (Lua, клиент, Delta)
+local Lighting = game:GetService("Lighting")
+
+local FOG_END, DENSITY = 500, 0.65
+local BLOOM, CONTRAST, SAT, DOF, BRIGHT = 2.8, 0.45, 0.4, 0.22, 2.10
+local TINT = Color3.fromRGB(190, 215, 255)
+local AMB = Color3.fromRGB(40, 80, 170)
+local FOG = Color3.fromRGB(25, 70, 200)
+
+for _, v in ipairs(Lighting:GetChildren()) do
+    if v:IsA("PostEffect") or v:IsA("Atmosphere") or v:IsA("Sky") then v:Destroy() end
+end
+
+local bloom = Instance.new("BloomEffect", Lighting)
+local cc = Instance.new("ColorCorrectionEffect", Lighting)
+local rays = Instance.new("SunRaysEffect", Lighting)
+local dof = Instance.new("DepthOfFieldEffect", Lighting)
+local atm = Instance.new("Atmosphere", Lighting)
+local sky = Instance.new("Sky", Lighting)
+sky.StarCount = 0
+sky.CelestialBodiesShown = false
+
+local function apply()
+    bloom.Intensity, bloom.Size, bloom.Threshold = BLOOM, 45, 0.75
+    cc.Contrast, cc.Saturation, cc.TintColor = CONTRAST, SAT, TINT
+    rays.Intensity, rays.Spread = 0.15, 0.8
+    dof.FarIntensity, dof.NearIntensity = DOF, 0
+    dof.FocusDistance, dof.InFocusRadius = 60, 80
+    atm.Density, atm.Haze, atm.Offset = DENSITY, 2, 0.2
+    atm.Color, atm.Decay = FOG, FOG
+    Lighting.Ambient, Lighting.OutdoorAmbient = AMB, AMB
+    Lighting.Brightness = BRIGHT
+    Lighting.ExposureCompensation = 0.3
+    Lighting.FogColor, Lighting.FogStart, Lighting.FogEnd = FOG, 0, FOG_END
+    Lighting.ClockTime = 0
+end
+
+apply()
+task.spawn(function() -- игры любят сбрасывать освещение
+    while true do
+        apply()
+        task.wait(1)
+    end
+end)
+       else
+-- ОТКЛЮЧЕНИЕ NYX SHADERS
+_G.NyxShadersEnabled = false
+
+for _, v in ipairs(Lighting:GetChildren()) do
+    if v:IsA("PostEffect") or v:IsA("Atmosphere") or v:IsA("Sky") then
+        v:Destroy()
+    end
+    end    
         end
     end
 })
@@ -873,7 +1050,7 @@ local SettingsTab = Window:Tab({ Title = "Settings", Icon = "settings" })
 SettingsTab:Dropdown({
     Title = "Theme Selection",
     Values = AvailableThemes, -- Подставляем список автоматически найденных тем
-    Value = "Dark", -- Тема по умолчанию
+    Value = "Sky", -- Тема по умолчанию
     Callback = function(SelectedTheme)
         -- Код изменения темы оформления интерфейса
         WindUI:SetTheme(SelectedTheme)
