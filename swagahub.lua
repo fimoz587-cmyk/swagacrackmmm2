@@ -1,3 +1,253 @@
+--// SWAGA.CC WATERMARK
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local SoundService = game:GetService("SoundService")
+
+local LocalPlayer = Players.LocalPlayer
+
+--// ICONS
+local SWAGA_ICON = "rbxassetid://10039620127"
+local FPS_ICON = "rbxassetid://11395830213"
+local PING_ICON = "rbxassetid://105127187178989"
+
+--// START SOUND
+local StartSound = Instance.new("Sound")
+StartSound.Name = "SwagaStartSound"
+StartSound.SoundId = "rbxassetid://1548304764"
+StartSound.Volume = 1
+StartSound.Parent = SoundService
+
+task.spawn(function()
+    task.wait(0.1)
+
+    StartSound:Play()
+
+    StartSound.Ended:Wait()
+
+    if StartSound.Parent then
+        StartSound:Destroy()
+    end
+end)
+
+--// DARK BLUE COLORS
+local PANEL_COLOR = Color3.fromRGB(5, 13, 28)
+local ICON_COLOR = Color3.fromRGB(25, 70, 135)
+local TEXT_COLOR = Color3.fromRGB(150, 175, 205)
+local TITLE_COLOR = Color3.fromRGB(35, 90, 155)
+local OUTLINE_COLOR = Color3.fromRGB(25, 70, 135)
+
+--// GUI
+local WatermarkGui = Instance.new("ScreenGui")
+WatermarkGui.Name = "SwagaWatermark"
+WatermarkGui.ResetOnSpawn = false
+WatermarkGui.IgnoreGuiInset = true
+WatermarkGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+WatermarkGui.Parent = game:GetService("CoreGui")
+
+--// MAIN
+local Main = Instance.new("Frame")
+Main.Name = "Main"
+Main.Size = UDim2.new(0, 175, 0, 32)
+Main.Position = UDim2.new(0, 15, 0, 15)
+
+Main.BackgroundColor3 = PANEL_COLOR
+Main.BackgroundTransparency = 0.2
+Main.BorderSizePixel = 0
+Main.Active = true
+Main.Parent = WatermarkGui
+
+--// CORNER
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0, 8)
+Corner.Parent = Main
+
+--// OUTLINE
+local Stroke = Instance.new("UIStroke")
+Stroke.Color = OUTLINE_COLOR
+Stroke.Transparency = 0.25
+Stroke.Thickness = 1
+Stroke.Parent = Main
+
+--// SWAGA ICON
+local SwagaIcon = Instance.new("ImageLabel")
+SwagaIcon.Name = "SwagaIcon"
+SwagaIcon.BackgroundTransparency = 1
+SwagaIcon.Position = UDim2.new(0, 7, 0.5, -9)
+SwagaIcon.Size = UDim2.new(0, 18, 0, 18)
+
+SwagaIcon.Image = SWAGA_ICON
+SwagaIcon.ImageColor3 = ICON_COLOR
+SwagaIcon.ImageTransparency = 0
+SwagaIcon.ScaleType = Enum.ScaleType.Fit
+
+SwagaIcon.Parent = Main
+
+--// SWAGA.CC
+local Title = Instance.new("TextLabel")
+Title.Name = "Title"
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0, 29, 0, 0)
+Title.Size = UDim2.new(0, 43, 1, 0)
+
+Title.Font = Enum.Font.GothamBold
+Title.Text = "swaga.cc"
+Title.TextColor3 = TITLE_COLOR
+Title.TextSize = 11
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+Title.Parent = Main
+
+--// INFO CREATOR
+local function createInfo(iconId, text, x, width)
+
+    local Icon = Instance.new("ImageLabel")
+    Icon.Name = "Icon"
+    Icon.BackgroundTransparency = 1
+    Icon.Position = UDim2.new(0, x, 0.5, -6)
+    Icon.Size = UDim2.new(0, 12, 0, 12)
+
+    Icon.Image = iconId
+    Icon.ImageColor3 = ICON_COLOR
+    Icon.ImageTransparency = 0
+
+    Icon.Parent = Main
+
+    local Label = Instance.new("TextLabel")
+    Label.Name = "Label"
+    Label.BackgroundTransparency = 1
+    Label.Position = UDim2.new(0, x + 15, 0, 0)
+    Label.Size = UDim2.new(0, width, 1, 0)
+
+    Label.Font = Enum.Font.GothamMedium
+    Label.Text = text
+    Label.TextColor3 = TEXT_COLOR
+    Label.TextSize = 9
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+
+    Label.Parent = Main
+
+    return Label
+end
+
+--// FPS
+local FPSLabel = createInfo(
+    FPS_ICON,
+    "0 FPS",
+    76,
+    48
+)
+
+--// PING
+local PingLabel = createInfo(
+    PING_ICON,
+    "0ms",
+    127,
+    42
+)
+
+--// FPS CALCULATION
+local frames = 0
+local lastTime = tick()
+
+RunService.RenderStepped:Connect(function()
+
+    frames += 1
+
+    local currentTime = tick()
+
+    if currentTime - lastTime >= 1 then
+
+        FPSLabel.Text = tostring(frames) .. " FPS"
+
+        frames = 0
+        lastTime = currentTime
+
+    end
+end)
+
+--// PING
+task.spawn(function()
+
+    while WatermarkGui.Parent do
+
+        task.wait(1)
+
+        local success, ping = pcall(function()
+            return math.floor(
+                LocalPlayer:GetNetworkPing() * 1000
+            )
+        end)
+
+        if success then
+            PingLabel.Text = tostring(ping) .. "ms"
+        else
+            PingLabel.Text = "0ms"
+        end
+
+    end
+end)
+
+--// DRAG SYSTEM
+local dragging = false
+local dragStart
+local startPos
+
+local function updateDrag(input)
+
+    if not dragStart or not startPos then
+        return
+    end
+
+    local delta = input.Position - dragStart
+
+    Main.Position = UDim2.new(
+        startPos.X.Scale,
+        startPos.X.Offset + delta.X,
+
+        startPos.Y.Scale,
+        startPos.Y.Offset + delta.Y
+    )
+end
+
+--// MOUSE / TOUCH START
+Main.InputBegan:Connect(function(input)
+
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+
+        dragging = true
+        dragStart = input.Position
+        startPos = Main.Position
+
+        input.Changed:Connect(function()
+
+            if input.UserInputState == Enum.UserInputState.End then
+
+                dragging = false
+                dragStart = nil
+                startPos = nil
+
+            end
+        end)
+    end
+end)
+
+--// MOUSE / TOUCH MOVEMENT
+UserInputService.InputChanged:Connect(function(input)
+
+    if not dragging then
+        return
+    end
+
+    if input.UserInputType == Enum.UserInputType.MouseMovement
+        or input.UserInputType == Enum.UserInputType.Touch then
+
+        updateDrag(input)
+
+    end
+end)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
